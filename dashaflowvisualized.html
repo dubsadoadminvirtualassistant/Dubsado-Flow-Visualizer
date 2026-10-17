@@ -383,6 +383,21 @@ a.btn { display: inline-block; text-decoration: none; }
 .lib-item .email-block { padding: 4px 16px 18px; }
 .lib-note { font-size: 12.5px; color: var(--accent-grey); margin: 14px 0 0; }
 @media (max-width: 560px) { .library { padding-left: 14px; padding-right: 14px; } }
+
+/* ---------- Sheet sync ---------- */
+.sync { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 860px; margin: 0 0 14px; padding: 8px 14px; border-radius: 10px; background: var(--third-color); font-size: 13px; font-weight: 600; color: var(--second-color); }
+.sync-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--accent-grey); }
+.sync[data-kind="ok"] .sync-dot { background: var(--fourth-color); }
+.sync[data-kind="loading"] .sync-dot, .sync[data-kind="saving"] .sync-dot { background: var(--accent-red); animation: pulse2 1s ease-in-out infinite; }
+.sync[data-kind="error"] .sync-dot { background: var(--accent-red); }
+.sync[data-kind="error"] { border-left: 4px solid var(--accent-red); }
+.sync button { margin-left: auto; }
+.sync button[hidden] { display: none; }
+@keyframes pulse2 { 50% { opacity: .3; } }
+.em-meta { font-size: 12px; color: var(--accent-grey); margin-top: 2px; }
+.em-status { font-size: 13px; font-weight: 600; margin: 10px 0 0; color: var(--fourth-color); }
+.em-status.err { border-left: 3px solid var(--accent-red); padding-left: 10px; color: var(--second-color); }
+.em-edit input:disabled, .em-edit textarea:disabled, .btn:disabled { opacity: .55; }
 </style>
 </head>
 <body>
@@ -433,8 +448,9 @@ a.btn { display: inline-block; text-decoration: none; }
       <button type="button" class="btn ghost sm" id="libDownload">Download all (.txt)</button>
     </div>
   </div>
+  <div class="sync" id="syncBar" role="status" data-kind="off"><span class="sync-dot" aria-hidden="true"></span><span id="syncText"></span><button type="button" class="btn ghost sm" id="syncRefresh" hidden>Refresh</button></div>
   <div class="lib-list" id="libList"></div>
-  <p class="lib-note">Edits are saved in this browser only. Use Copy or Download to move the final wording into Dubsado.</p>
+  <p class="lib-note" id="libNote"></p>
 </section>
 
 <section class="legend" aria-label="Legend">
@@ -460,6 +476,11 @@ a.btn { display: inline-block; text-decoration: none; }
 </aside>
 
 <script>
+/* ===== GOOGLE SHEETS CONNECTION =====
+   Paste your Apps Script web app URL (it ends in /exec) between the quotes.
+   Leave it empty and edits stay in this browser only. */
+var SHEET_URL = '';
+
 (function () {
   'use strict';
 
@@ -774,8 +795,10 @@ Best,
 
   /* ---------- State ---------- */
   var STORE = 'dubsado-journey-v2', EMAIL_STORE = 'dubsado-emails-v1';
-  var state = { p: 0, lost: null, view: null, filters: [], reasons: REASONS_DEFAULT.slice(), pick: { x: '', y: '' }, editing: null, draft: null };
+  var state = { p: 0, lost: null, view: null, filters: [], reasons: REASONS_DEFAULT.slice(), pick: { x: '', y: '' }, editing: null, draft: null, saving: false, saveError: '' };
   var emailStore = {};
+  var emailMeta = {};
+  var SYNC = !!SHEET_URL;
   try {
     var saved = JSON.parse(localStorage.getItem(STORE) || 'null');
     if (saved) {
@@ -841,21 +864,29 @@ Best,
     return st ? 'Step ' + st.n + ' · ' + st.title : 'Lead lost path · steps 7 and 15';
   }
 
+  function fmtTime(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
   function emailBlockHTML(id, where) {
-    var m = getEmail(id);
+    var m = getEmail(id), meta = emailMeta[id];
     var editing = state.editing && state.editing.id === id && state.editing.where === where;
-    var head = '<div class="em-head"><div><div class="em-label">Email ' + m.n + '</div><div class="em-name">' + esc(m.name) + '</div></div>' +
+    var head = '<div class="em-head"><div><div class="em-label">Email ' + m.n + '</div><div class="em-name">' + esc(m.name) + '</div>' +
+      (meta ? '<div class="em-meta">Last updated ' + esc(fmtTime(meta.ts)) + ' · update #' + esc(meta.update) + '</div>' : '') + '</div>' +
       (m.edited ? '<span class="em-edited">Edited</span>' : '') + '</div>';
     if (editing) {
-      var d = state.draft;
+      var d = state.draft, dis = state.saving ? ' disabled' : '';
       return head + '<div class="em-edit">' +
-        '<label class="em-field"><span>Subject</span><input type="text" class="em-subject" value="' + esc(d.subject) + '"></label>' +
-        '<label class="em-field"><span>Message</span><textarea class="em-body" rows="16">' + esc(d.body) + '</textarea></label>' +
+        '<label class="em-field"><span>Subject</span><input type="text" class="em-subject" value="' + esc(d.subject) + '"' + dis + '></label>' +
+        '<label class="em-field"><span>Message</span><textarea class="em-body" rows="16"' + dis + '>' + esc(d.body) + '</textarea></label>' +
         '<div class="em-tags"><span>Insert merge field</span>' +
-        MERGE_TAGS.map(function (t) { return '<button type="button" class="mtag-btn" data-tag="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>' +
-        '<p class="em-hint">Leave a blank line between paragraphs. Start a line with "- " to make a bullet.</p>' +
-        '<div class="em-actions"><button type="button" class="btn sm" data-em="save">Save changes</button>' +
-        '<button type="button" class="btn sm ghost" data-em="cancel">Cancel</button></div></div>';
+        MERGE_TAGS.map(function (t) { return '<button type="button" class="mtag-btn" data-tag="' + esc(t) + '"' + dis + '>' + esc(t) + '</button>'; }).join('') + '</div>' +
+        '<p class="em-hint">Leave a blank line between paragraphs. Start a line with "- " to make a bullet.' + (SYNC ? ' Saves to your Google Sheet as Email # ' + m.n + '.' : '') + '</p>' +
+        (state.saving ? '<p class="em-status" role="status">Saving to Google Sheets…</p>' : state.saveError ? '<p class="em-status err" role="alert">' + esc(state.saveError) + '</p>' : '') +
+        '<div class="em-actions"><button type="button" class="btn sm" data-em="save"' + dis + '>' + (state.saving ? 'Saving…' : 'Save changes') + '</button>' +
+        '<button type="button" class="btn sm ghost" data-em="cancel"' + dis + '>Cancel</button></div></div>';
     }
     return head + '<div class="em-paper"><div class="em-subj"><span>Subject</span>' + withTags(esc(m.subject)) + '</div>' +
       '<div class="em-text">' + renderBody(m.body) + '</div></div>' +
@@ -897,18 +928,123 @@ Best,
     var f = $('.email-block[data-email="' + id + '"][data-where="' + where + '"] .em-subject');
     if (f) f.focus();
   }
-  function endEdit(id) { state.editing = null; state.draft = null; refreshEmail(id); }
-  function saveEdit(id, where) {
-    var base = EMAIL_BY_ID[id];
-    var subj = state.draft.subject.trim() || base.subject;
-    var body = state.draft.body.replace(/\r/g, '').replace(/\s+$/, '');
-    if (!body.trim()) body = base.body;
-    if (subj === base.subject && body === base.body) delete emailStore[id];
-    else emailStore[id] = { subject: subj, body: body };
+  function endEdit(id) { state.editing = null; state.draft = null; state.saveError = ''; refreshEmail(id); }
+  function norm(s) { return String(s).replace(/\r/g, '').replace(/\s+$/, ''); }
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  /* ---- Google Sheets sync ----
+     Sheet columns: update number | Timestamp | Email # | Email Updates
+     "Email Updates" holds the whole email as:  Subject: <subject> + blank line + <body> */
+  var syncBar = $('#syncBar'), syncText = $('#syncText'), syncRefresh = $('#syncRefresh'), libNote = $('#libNote');
+  var lastSync = 0;
+
+  function setSync(kind, msg) {
+    syncBar.setAttribute('data-kind', kind);
+    var t;
+    if (kind === 'off') t = 'Not connected to Google Sheets. Edits stay in this browser only.';
+    else if (kind === 'loading') t = 'Loading the latest emails from Google Sheets…';
+    else if (kind === 'saving') t = 'Saving to Google Sheets…';
+    else if (kind === 'ok') { lastSync = Date.now(); t = 'Connected to Google Sheets · everyone sees the newest version · synced ' + new Date().toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); }
+    else t = msg || 'Couldn’t reach Google Sheets. Showing the last copy saved in this browser.';
+    syncText.textContent = t;
+    syncRefresh.hidden = kind === 'off';
+    libNote.textContent = SYNC
+      ? 'Every save is added to your Google Sheet as a new numbered update, so the full history is kept. The newest update is what everyone sees. If two people edit the same email at once, the later save wins.'
+      : 'Edits are saved in this browser only. Use Copy or Download to move the final wording into Dubsado.';
+  }
+
+  function encodeEmail(subject, body) { return 'Subject: ' + subject + '\n\n' + body; }
+  function decodeEmail(text, base) {
+    var t = String(text).replace(/\r/g, '');
+    var mt = /^Subject:[ \t]*(.*)\n\n([\s\S]*)$/.exec(t);
+    if (mt) return { subject: mt[1].trim() || base.subject, body: norm(mt[2]) };
+    return { subject: base.subject, body: norm(t) }; // someone typed straight into the sheet
+  }
+
+  function fetchRemote() {
+    var url = SHEET_URL + (SHEET_URL.indexOf('?') === -1 ? '?' : '&') + 't=' + Date.now();
+    return fetch(url, { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || data.result !== 'success') throw new Error((data && data.error) || 'Unexpected reply from Google Sheets');
+        return data.emails || {};
+      });
+  }
+
+  function applyRemote(emails) {
+    var next = {}, meta = {};
+    EMAILS.forEach(function (m) {
+      var r = emails[m.n];
+      if (!r) return;
+      var d = decodeEmail(r.text, m);
+      meta[m.id] = { update: r.update, ts: r.timestamp };
+      if (d.subject !== m.subject || d.body !== m.body) next[m.id] = d;
+    });
+    emailStore = next; emailMeta = meta;
     saveEmails();
-    endEdit(id);
-    var b = $('.email-block[data-email="' + id + '"][data-where="' + where + '"] [data-em="edit"]');
-    if (b) b.focus();
+    EMAILS.forEach(function (m) { refreshEmail(m.id); });
+  }
+
+  function loadRemote(quiet) {
+    if (!SYNC) return Promise.resolve();
+    if (!quiet) setSync('loading');
+    return fetchRemote().then(function (emails) {
+      applyRemote(emails); setSync('ok');
+    }, function () {
+      if (!quiet) setSync('error', 'Couldn’t read from Google Sheets. Check that the web app is deployed with access set to "Anyone". Showing the last copy saved in this browser.');
+    });
+  }
+
+  // Adds a new row to the sheet, then reads it back to confirm it landed.
+  function pushEmail(id, subject, body) {
+    var m = EMAIL_BY_ID[id], text = encodeEmail(subject, body), params = new URLSearchParams();
+    params.set('emailNumber', String(m.n));
+    params.set('emailUpdate', text);
+    return fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', body: params }).then(function () {
+      var tries = 0;
+      function check() {
+        tries++;
+        return wait(tries === 1 ? 700 : 1200).then(fetchRemote).then(function (e) { return e; }, function () { return null; })
+          .then(function (emails) {
+            var r = emails && emails[m.n];
+            if (r && norm(r.text) === norm(text)) { applyRemote(emails); setSync('ok'); return; }
+            if (tries < 5) return check();
+            throw new Error('We couldn’t confirm that this saved to Google Sheets. Please try Save again.');
+          });
+      }
+      return check();
+    }, function () {
+      throw new Error('Couldn’t reach Google Sheets. Check your connection and try Save again.');
+    });
+  }
+
+  function saveEdit(id, where) {
+    if (state.saving) return;
+    var base = EMAIL_BY_ID[id];
+    var subj = state.draft.subject.replace(/\s*\n\s*/g, ' ').trim() || base.subject;
+    var body = norm(state.draft.body);
+    if (!body.trim()) body = base.body;
+    var cur = getEmail(id);
+    function focusEdit() {
+      var b = $('.email-block[data-email="' + id + '"][data-where="' + where + '"] [data-em="edit"]');
+      if (b) b.focus();
+    }
+    if (subj === cur.subject && body === cur.body) { endEdit(id); focusEdit(); return; }
+    if (!SYNC) {
+      if (subj === base.subject && body === base.body) delete emailStore[id];
+      else emailStore[id] = { subject: subj, body: body };
+      saveEmails();
+      endEdit(id);
+      focusEdit();
+      return;
+    }
+    state.saving = true; state.saveError = '';
+    refreshEmail(id);
+    pushEmail(id, subj, body).then(function () {
+      state.saving = false; endEdit(id); focusEdit();
+    }, function (err) {
+      state.saving = false; state.saveError = err.message; refreshEmail(id);
+    });
   }
 
   /* ---------- Build nodes ---------- */
@@ -1359,7 +1495,14 @@ Best,
     if (act === 'edit') startEdit(id, where);
     else if (act === 'cancel') endEdit(id);
     else if (act === 'save') saveEdit(id, where);
-    else if (act === 'reset') { delete emailStore[id]; saveEmails(); refreshEmail(id); }
+    else if (act === 'reset') {
+      if (!SYNC) { delete emailStore[id]; saveEmails(); refreshEmail(id); }
+      else {
+        var orig = EMAIL_BY_ID[id];
+        setSync('saving');
+        pushEmail(id, orig.subject, orig.body).catch(function (err) { setSync('error', err.message); });
+      }
+    }
     else if (act === 'copy') {
       var m = getEmail(id);
       copyText('Subject: ' + m.subject + '\n\n' + m.body, function () {
@@ -1431,6 +1574,12 @@ Best,
   setView(state.view);
   updateState();
   layout();
+
+  syncRefresh.addEventListener('click', function () { loadRemote(); });
+  document.addEventListener('visibilitychange', function () {
+    if (SYNC && !document.hidden && !state.saving && Date.now() - lastSync > 20000) loadRemote(true);
+  });
+  if (SYNC) loadRemote(); else setSync('off');
 })();
 
 </script>
