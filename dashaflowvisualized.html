@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client Journey Flowchart · Dubsado Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&family=Tenor+Sans&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: "jarbinksregularwebfont";
+  src: url("https://static.showit.co/file/HDOqxAzGjAWpA5pLbHZzIg/334605/jar-binks-regular_1-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --main-color: #fbf9ED;
+  --second-color: #3f1521;
+  --third-color: #D7D2c4;
+  --fourth-color: #6A1B36;
+
+  --primary-mid: #8b2f49;
+  --primary-soft: #A2586d;
+  --accent-grey: #53565a;
+  --accent-red: #E0523E;
+
+  --p-color: #20211E;
+  --heading-color: #3f1521;
+
+  --font-body: "Raleway", sans-serif;
+  --font-head: "Tenor Sans", serif;
+  --font-script: "jarbinksregularwebfont", "Tenor Sans", cursive;
+
+  --rail: 32px;
+  --done-bg: color-mix(in srgb, var(--third-color) 50%, var(--main-color));
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-padding-top: 120px; }
+body {
+  margin: 0;
+  background: var(--main-color);
+  color: var(--p-color);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 { font-family: var(--font-head); color: var(--heading-color); font-weight: 400; margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent-red); outline-offset: 2px; border-radius: 6px; }
+
+/* ---------- Header ---------- */
+.top { max-width: 1200px; margin: 0 auto; padding: 36px 24px 18px; }
+.eyebrow {
+  font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--fourth-color); font-weight: 600; margin: 0 0 8px;
+}
+.top h1 { font-size: clamp(30px, 4.6vw, 50px); line-height: 1.1; }
+.script {
+  font-family: var(--font-script); color: var(--primary-mid);
+  font-size: clamp(22px, 3vw, 32px); margin: 6px 0 0; line-height: 1.2;
+}
+.lede { max-width: 62ch; margin: 14px 0 0; color: var(--accent-grey); }
+
+/* ---------- Toolbar ---------- */
+.toolbar {
+  background: color-mix(in srgb, var(--main-color) 94%, transparent);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(63,21,33,.12);
+  border-bottom: 1px solid rgba(63,21,33,.12);
+  position: relative; z-index: 30;
+}
+@media (min-width: 760px) { .toolbar { position: sticky; top: 0; } }
+.toolbar-in {
+  max-width: 1200px; margin: 0 auto; padding: 12px 24px;
+  display: grid; gap: 12px 24px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) { .toolbar-in { grid-template-columns: minmax(260px, 1fr) auto; align-items: center; } }
+.progress-wrap { display: flex; flex-direction: column; gap: 6px; }
+.progress-text { font-size: 13px; font-weight: 600; color: var(--second-color); }
+.bar { height: 8px; border-radius: 999px; background: var(--third-color); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--fourth-color); border-radius: 999px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.seg { display: inline-flex; border: 1.5px solid var(--fourth-color); border-radius: 999px; overflow: hidden; }
+.seg button {
+  background: transparent; border: 0; padding: 7px 14px; font-size: 13px; font-weight: 600; color: var(--fourth-color);
+}
+.seg button[aria-pressed="true"] { background: var(--fourth-color); color: var(--main-color); }
+.filters {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding-top: 2px;
+}
+.filters .lbl { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--accent-grey); margin-right: 4px; }
+.chip {
+  background: var(--main-color); border: 1.5px solid rgba(63,21,33,.28); color: var(--second-color);
+  padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.3;
+  transition: background .2s, color .2s, border-color .2s;
+}
+.chip[aria-pressed="true"] { background: var(--second-color); color: var(--main-color); border-color: var(--second-color); }
+.chip.approval-chip { border-style: dashed; border-color: var(--accent-red); }
+.chip.approval-chip[aria-pressed="true"] { background: var(--accent-red); color: var(--second-color); border-style: solid; border-color: var(--accent-red); }
+
+.btn {
+  background: var(--second-color); color: var(--main-color); border: 1.5px solid var(--second-color);
+  padding: 9px 18px; border-radius: 999px; font-weight: 600; font-size: 14px;
+  transition: background .2s, color .2s, border-color .2s, opacity .2s;
+}
+.btn:hover:not(:disabled) { background: var(--fourth-color); border-color: var(--fourth-color); }
+.btn.ghost { background: transparent; color: var(--second-color); }
+.btn.ghost:hover:not(:disabled) { background: var(--third-color); color: var(--second-color); border-color: var(--second-color); }
+.btn.sm { padding: 6px 12px; font-size: 12.5px; }
+.btn[aria-pressed="true"] { background: var(--fourth-color); border-color: var(--fourth-color); color: var(--main-color); }
+.btn.ghost[aria-pressed="true"] { background: var(--accent-red); border-color: var(--accent-red); color: var(--second-color); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---------- Stage / canvas ---------- */
+.stage { max-width: 1200px; margin: 0 auto; padding: 36px 24px 40px; }
+.stage.is-horizontal { max-width: none; overflow-x: auto; padding-bottom: 56px; scrollbar-color: var(--primary-soft) var(--third-color); }
+.canvas { position: relative; }
+.canvas.view-horizontal { width: max-content; min-width: 100%; padding: 0 12px; }
+.canvas.view-vertical { max-width: 720px; margin: 0 auto; }
+#edges { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; overflow: visible; }
+#labels { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; width: 100%; height: 100%; }
+.nodes { position: relative; z-index: 1; list-style: none; margin: 0; padding: 0; display: flex; }
+.view-horizontal .nodes { flex-direction: row; gap: 104px; align-items: flex-start; }
+.view-vertical .nodes { flex-direction: column; gap: 54px; }
+.slot { display: flex; flex-direction: column; }
+.view-horizontal .slot.has-branch .card.branch { margin-top: 64px; }
+.view-vertical .slot.has-branch .card.branch { margin-top: 52px; margin-left: 64px; width: calc(100% - 64px); }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--third-color);
+  border: 1.5px solid transparent;
+  border-radius: 16px;
+  padding: 15px 16px 14px;
+  position: relative;
+  box-shadow: 0 1px 0 rgba(63,21,33,.08), 0 10px 24px -16px rgba(63,21,33,.55);
+  transition: box-shadow .3s, border-color .3s, opacity .3s, background .3s, filter .3s;
+  cursor: pointer;
+}
+.view-horizontal .card { width: 276px; }
+.view-vertical .card { width: 100%; }
+.card:hover { box-shadow: 0 1px 0 rgba(63,21,33,.1), 0 14px 28px -14px rgba(63,21,33,.7); }
+.card.approval { border: 1.5px dashed var(--accent-red); }
+.card.decision { border-top: 4px solid var(--accent-red); }
+.card.st-done { background: var(--done-bg); border-color: var(--fourth-color); border-style: solid; }
+.card.st-active { box-shadow: 0 0 0 3px var(--main-color), 0 0 0 5px var(--accent-red), 0 14px 28px -14px rgba(63,21,33,.7); animation: pulse 2.4s ease-in-out infinite; }
+.card.st-blocked { opacity: .5; filter: saturate(.5); }
+.card.dim { opacity: .3; }
+.card.branch { background: var(--main-color); border: 1.5px dashed var(--accent-grey); }
+.card.branch.st-active { border-style: solid; border-color: var(--accent-red); background: var(--third-color); }
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--main-color), 0 0 0 5px var(--accent-red), 0 14px 28px -14px rgba(63,21,33,.7); }
+  50% { box-shadow: 0 0 0 3px var(--main-color), 0 0 0 8px rgba(224,82,62,.35), 0 14px 28px -14px rgba(63,21,33,.7); }
+}
+.card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.num {
+  font-family: var(--font-head); font-size: 15px; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--second-color); color: var(--main-color); display: inline-grid; place-items: center; flex: none;
+}
+.card.decision .num { border-radius: 8px; transform: rotate(45deg); }
+.card.decision .num span { transform: rotate(-45deg); display: block; }
+.where { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--accent-grey); }
+.pill {
+  margin-left: auto; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+  border: 1px solid rgba(63,21,33,.3); white-space: nowrap; color: var(--second-color);
+}
+.st-active .pill { background: var(--accent-red); border-color: var(--accent-red); color: var(--second-color); }
+.st-done .pill { background: var(--fourth-color); border-color: var(--fourth-color); color: var(--main-color); }
+.st-ended .pill { background: var(--second-color); color: var(--main-color); border-color: var(--second-color); }
+.card h3 { font-size: 19px; line-height: 1.25; }
+.card h3 .open { background: none; border: 0; padding: 0; text-align: left; font: inherit; color: inherit; }
+.card h3 .open:hover { text-decoration: underline; text-decoration-color: var(--accent-red); text-underline-offset: 4px; }
+.sum { margin: 6px 0 10px; font-size: 13.5px; color: #3a3b36; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge {
+  display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; letter-spacing: .02em;
+  padding: 4px 10px; border-radius: 999px; line-height: 1.2; border: 1.5px solid transparent;
+}
+.b-manual { background: var(--second-color); color: var(--main-color); }
+.b-email { background: var(--primary-soft); color: #fff; }
+.b-client { background: var(--accent-grey); color: #fff; }
+.b-form { background: transparent; border-color: var(--fourth-color); color: var(--fourth-color); }
+.b-status { background: var(--main-color); border-color: rgba(63,21,33,.28); color: var(--second-color); }
+.b-task { background: var(--primary-mid); color: #fff; }
+.b-handoff { background: var(--main-color); border-color: var(--accent-red); color: var(--second-color); }
+.approval-tag {
+  display: inline-block; margin-top: 10px; background: var(--accent-red); color: var(--second-color);
+  font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 6px;
+}
+.card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.decide { display: flex; gap: 6px; flex-wrap: wrap; }
+.more { background: none; border: 0; padding: 4px 2px; font-size: 12.5px; font-weight: 700; color: var(--fourth-color); }
+.more:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- Edges ---------- */
+svg .base { fill: none; stroke: var(--accent-grey); stroke-opacity: .45; stroke-width: 2; stroke-linecap: round; }
+svg .edge.alt .base { stroke: var(--accent-red); stroke-opacity: .7; stroke-dasharray: 5 6; }
+svg .fill {
+  fill: none; stroke: var(--fourth-color); stroke-width: 3.2; stroke-linecap: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .8s cubic-bezier(.4,0,.2,1);
+}
+svg .edge.active .fill { stroke-dashoffset: 0; }
+svg .edge.alt .fill { stroke: var(--accent-red); }
+svg .head { fill: var(--accent-grey); fill-opacity: .5; transition: fill .3s ease .55s, fill-opacity .3s ease .55s; }
+svg .edge.active .head { fill: var(--fourth-color); fill-opacity: 1; }
+svg .edge.alt.active .head { fill: var(--accent-red); }
+svg .edge.alt .head { fill: var(--accent-red); fill-opacity: .7; }
+svg .flow { fill: none; stroke: var(--accent-red); stroke-width: 2.6; stroke-dasharray: 4 9; stroke-linecap: round; opacity: 0; transition: opacity .3s; }
+svg .edge.next .flow { opacity: 1; animation: dash 1s linear infinite; }
+svg .edge.blocked { opacity: .3; }
+@keyframes dash { to { stroke-dashoffset: -13; } }
+
+.elabel {
+  position: absolute; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; white-space: nowrap;
+  padding: 3px 9px; border-radius: 999px; background: var(--main-color);
+  border: 1.5px solid var(--primary-soft); color: var(--second-color); line-height: 1.3;
+}
+.elabel.yes { border-color: var(--accent-red); }
+.elabel.alt { border-style: dashed; border-color: var(--accent-red); }
+.elabel.blocked { opacity: .4; }
+
+/* ---------- Legend ---------- */
+.legend { max-width: 1200px; margin: 0 auto; padding: 0 24px 48px; color: var(--accent-grey); font-size: 13px; }
+.legend h2 { font-size: 20px; margin-bottom: 10px; }
+.legend ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px 28px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.legend li { display: flex; gap: 10px; align-items: center; }
+.sw { width: 34px; height: 20px; border-radius: 6px; flex: none; }
+.sw.appr { border: 1.5px dashed var(--accent-red); background: var(--third-color); }
+.sw.dec { border-top: 4px solid var(--accent-red); background: var(--third-color); }
+.sw.cur { background: var(--third-color); box-shadow: 0 0 0 2px var(--main-color), 0 0 0 4px var(--accent-red); }
+.sw.don { background: var(--done-bg); border: 1.5px solid var(--fourth-color); }
+.legend .note { margin-top: 16px; max-width: 80ch; }
+
+/* ---------- Drawer ---------- */
+.scrim { position: fixed; inset: 0; background: rgba(63,21,33,.45); z-index: 90; opacity: 0; pointer-events: none; transition: opacity .3s; }
+.scrim.on { opacity: 1; pointer-events: auto; }
+.drawer {
+  position: fixed; top: 0; right: 0; height: 100vh; height: 100dvh; width: min(480px, 100vw); z-index: 100;
+  background: var(--main-color); border-left: 1px solid rgba(63,21,33,.2);
+  box-shadow: -20px 0 50px -20px rgba(63,21,33,.5);
+  display: flex; flex-direction: column;
+  transform: translateX(104%); visibility: hidden;
+  transition: transform .35s cubic-bezier(.4,0,.2,1), visibility 0s linear .35s;
+}
+.drawer.open { transform: none; visibility: visible; transition-delay: 0s; }
+.d-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(63,21,33,.15); }
+.d-head .where { font-size: 11px; }
+.d-close { background: var(--third-color); border: 0; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; line-height: 1; }
+.d-close:hover { background: var(--second-color); color: var(--main-color); }
+.d-body { padding: 20px; overflow-y: auto; flex: 1; }
+.d-body h2 { font-size: 27px; line-height: 1.2; margin: 4px 0 12px; }
+.d-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+.d-sec { margin-top: 20px; }
+.d-sec h4 { font-family: var(--font-body); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; color: var(--fourth-color); margin-bottom: 6px; }
+.d-sec p { margin: 0; }
+.d-sec ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.d-sec li.stat::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--primary-mid); margin-right: 9px; }
+.auto-kind { display: inline-flex; align-items: center; gap: 8px; }
+.auto-kind::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent-grey); }
+.auto-kind.k-auto::before { background: var(--primary-mid); }
+.auto-kind.k-manual::before { background: var(--second-color); }
+.auto-kind.k-approval::before { background: var(--accent-red); }
+.next-btn {
+  display: flex; width: 100%; text-align: left; gap: 10px; align-items: baseline;
+  background: var(--third-color); border: 0; border-radius: 10px; padding: 10px 12px; font-weight: 600; color: var(--second-color);
+}
+.next-btn:hover { background: var(--second-color); color: var(--main-color); }
+.next-btn small { font-weight: 600; color: var(--accent-grey); display: block; }
+.next-btn:hover small { color: var(--third-color); }
+.d-foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 14px 20px; border-top: 1px solid rgba(63,21,33,.15); background: var(--main-color); }
+.d-foot .spacer { flex: 1; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 560px) {
+  .top { padding-top: 28px; }
+  .stage { padding-left: 14px; padding-right: 14px; }
+  .toolbar-in { padding-left: 14px; padding-right: 14px; }
+  .legend { padding-left: 14px; padding-right: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+}
+
+/* ---------- Pills in drawer ---------- */
+.pill.st-active { background: var(--accent-red); border-color: var(--accent-red); color: var(--second-color); }
+.pill.st-done { background: var(--fourth-color); border-color: var(--fourth-color); color: var(--main-color); }
+.pill.st-ended { background: var(--second-color); border-color: var(--second-color); color: var(--main-color); }
+
+/* ---------- Lead lost branch ---------- */
+a.btn { display: inline-block; text-decoration: none; }
+.sw.br { border: 1.5px dashed var(--accent-grey); background: var(--main-color); }
+.seq { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 7px; }
+.seq li { display: flex; gap: 9px; align-items: flex-start; font-size: 13px; line-height: 1.4; }
+.seq li > span {
+  flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--second-color); color: var(--main-color);
+  font-size: 11px; font-weight: 700; display: grid; place-items: center; margin-top: 1px;
+}
+.seq li.k-wait > span { background: var(--accent-red); color: var(--second-color); }
+.seq li.k-status > span { background: var(--primary-mid); }
+.seq li.k-email > span { background: var(--primary-soft); color: #fff; }
+.reason-chip {
+  display: inline-block; margin-top: 10px; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+  border: 1.5px dashed var(--accent-red); color: var(--second-color); background: var(--main-color);
+}
+.reason-chip[hidden] { display: none; }
+
+/* ---------- Email chip on cards ---------- */
+.mailchip {
+  display: flex; align-items: flex-start; gap: 8px; width: 100%; margin-top: 10px; text-align: left;
+  background: var(--main-color); border: 1.5px solid rgba(63,21,33,.22); border-radius: 10px; padding: 7px 10px;
+  font-size: 12px; line-height: 1.35; color: var(--second-color);
+}
+.mailchip:hover { border-color: var(--fourth-color); }
+.mailchip svg { flex: none; margin-top: 2px; color: var(--fourth-color); }
+.mc-n { display: block; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 10.5px; color: var(--fourth-color); }
+.mc-sub { display: block; font-weight: 600; }
+
+/* ---------- Form fields ---------- */
+.fld, .em-field input, .em-field textarea {
+  width: 100%; font: inherit; font-size: 14px; color: var(--p-color);
+  background: color-mix(in srgb, var(--main-color) 45%, #fff);
+  border: 1.5px solid rgba(63,21,33,.35); border-radius: 10px; padding: 9px 12px;
+}
+.em-field textarea { resize: vertical; line-height: 1.55; min-height: 280px; }
+.reason-edit { margin-top: 10px; font-size: 13px; }
+.reason-edit summary { cursor: pointer; font-weight: 700; color: var(--fourth-color); }
+.reason-chips { list-style: none; margin: 10px 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.reason-chips li { display: inline-flex; align-items: center; gap: 4px; background: var(--third-color); border-radius: 999px; padding: 2px 4px 2px 10px; font-size: 12px; font-weight: 600; }
+.reason-chips button { border: 0; background: transparent; width: 20px; height: 20px; border-radius: 50%; line-height: 1; font-size: 15px; }
+.reason-chips button:hover { background: var(--second-color); color: var(--main-color); }
+.reason-add { display: flex; gap: 8px; align-items: center; }
+
+/* ---------- Email blocks ---------- */
+.em-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.em-label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--accent-grey); }
+.em-name { font-family: var(--font-head); font-size: 17px; color: var(--heading-color); }
+.em-edited {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: var(--accent-red);
+  color: var(--second-color); padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+}
+.em-edited[hidden] { display: none; }
+.em-paper { background: color-mix(in srgb, var(--main-color) 45%, #fff); border: 1px solid rgba(63,21,33,.18); border-radius: 12px; overflow: hidden; }
+.em-subj { padding: 10px 16px; border-bottom: 1px solid rgba(63,21,33,.12); font-weight: 700; color: var(--second-color); font-size: 14px; background: var(--main-color); }
+.em-subj > span:first-child { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-grey); margin-right: 10px; }
+.em-text { padding: 16px 18px 4px; font-size: 14.5px; line-height: 1.65; }
+.em-text p { margin: 0 0 14px; }
+.em-text ul { margin: 0 0 14px; padding-left: 20px; }
+.mtag { display: inline-block; background: var(--third-color); color: var(--fourth-color); border-radius: 5px; padding: 0 6px; font-size: 12.5px; font-weight: 600; line-height: 1.55; word-break: break-word; }
+.em-hint { font-size: 12px; color: var(--accent-grey); margin: 8px 0 0; }
+.em-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.em-field { display: grid; gap: 4px; margin-bottom: 12px; }
+.em-field > span { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--fourth-color); }
+.em-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-grey); }
+.mtag-btn { background: var(--third-color); color: var(--fourth-color); border: 0; border-radius: 5px; padding: 3px 8px; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.mtag-btn:hover { background: var(--second-color); color: var(--main-color); }
+
+/* ---------- Email library ---------- */
+.library { max-width: 1200px; margin: 0 auto; padding: 8px 24px 56px; }
+.library-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 14px; margin-bottom: 18px; }
+.library h2 { font-size: clamp(26px, 3.4vw, 36px); line-height: 1.15; }
+.lib-tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.lib-list { display: grid; gap: 10px; max-width: 860px; }
+.lib-item { background: var(--third-color); border: 1.5px solid transparent; border-radius: 14px; }
+.lib-item[open] { border-color: var(--fourth-color); background: color-mix(in srgb, var(--third-color) 55%, var(--main-color)); }
+.lib-item summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; flex-wrap: wrap; }
+.lib-item summary::-webkit-details-marker { display: none; }
+.lib-item summary::after { content: "+"; margin-left: auto; font-size: 22px; line-height: 1; color: var(--fourth-color); }
+.lib-item[open] summary::after { content: "\2212"; }
+.lib-n { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--second-color); color: var(--main-color); display: grid; place-items: center; font-family: var(--font-head); font-size: 15px; }
+.lib-main { display: flex; flex-direction: column; min-width: 0; flex: 1 1 220px; }
+.lib-name { font-family: var(--font-head); font-size: 17px; color: var(--heading-color); }
+.lib-subject { font-size: 13px; color: var(--accent-grey); }
+.lib-where { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; color: var(--accent-grey); }
+.lib-item .email-block { padding: 4px 16px 18px; }
+.lib-note { font-size: 12.5px; color: var(--accent-grey); margin: 14px 0 0; }
+@media (max-width: 560px) { .library { padding-left: 14px; padding-right: 14px; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <p class="eyebrow">Dubsado Workflow</p>
+  <h1>Client Journey Flowchart</h1>
+  <p class="script">from first inquiry to booked client</p>
+  <p class="lede">Seventeen steps from a website inquiry to the Booked Clients Flow. Select a step to see its trigger, automation and the exact email that goes out, and mark steps complete to light up the path. Every email is editable in the library below.</p>
+</header>
+
+<section class="toolbar" aria-label="Flowchart controls">
+  <div class="toolbar-in">
+    <div class="progress-wrap">
+      <div class="progress-text" id="progressText" aria-live="polite">0 of 17 steps complete</div>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="17" aria-valuenow="0" aria-label="Journey progress" id="bar"><i id="barFill"></i></div>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" data-view="vertical" aria-pressed="false">Vertical timeline</button>
+        <button type="button" data-view="horizontal" aria-pressed="false">Horizontal diagram</button>
+      </div>
+      <button type="button" class="btn" id="advance">Complete next step</button>
+      <button type="button" class="btn ghost" id="reset">Reset</button>
+      <a class="btn ghost" href="#library">Emails</a>
+    </div>
+    <div class="filters" id="filters" role="group" aria-label="Filter steps by type"></div>
+  </div>
+</section>
+
+<main class="stage" id="stage">
+  <div class="canvas" id="canvas">
+    <svg id="edges" aria-hidden="true" focusable="false"></svg>
+    <div id="labels" aria-hidden="true"></div>
+    <ol class="nodes" id="nodes" aria-label="Client journey steps"></ol>
+  </div>
+</main>
+
+<section class="library" id="library" aria-labelledby="libTitle">
+  <div class="library-head">
+    <div>
+      <p class="eyebrow">Client-facing copy</p>
+      <h2 id="libTitle">Email Library</h2>
+      <p class="lede">Every email in the journey, in the order your client receives them. Open one to read it, or choose Edit email to change the wording. Highlighted items are merge fields that Dubsado fills in automatically.</p>
+    </div>
+    <div class="lib-tools">
+      <button type="button" class="btn ghost sm" id="libToggle">Expand all</button>
+      <button type="button" class="btn ghost sm" id="libDownload">Download all (.txt)</button>
+    </div>
+  </div>
+  <div class="lib-list" id="libList"></div>
+  <p class="lib-note">Edits are saved in this browser only. Use Copy or Download to move the final wording into Dubsado.</p>
+</section>
+
+<section class="legend" aria-label="Legend">
+  <h2>How to read it</h2>
+  <ul>
+    <li><span class="sw appr"></span> Dashed red border: step needs approval or Dasha's assessment</li>
+    <li><span class="sw dec"></span> Red top edge and diamond: decision point (steps 7 and 15)</li>
+    <li><span class="sw cur"></span> Glowing ring: the current step</li>
+    <li><span class="sw don"></span> Filled card and solid arrow: completed</li>
+    <li><span class="sw br"></span> Dashed card: lead lost automation</li>
+  </ul>
+  <p class="note">Two paths lead to lead lost: not qualified (step 7) and contract not signed (step 15). Both record why the lead was lost and send the same follow-up email after 3 days. Only the not-qualified path changes the project status to Lead Lost.</p>
+</section>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" aria-hidden="true">
+  <div class="d-head">
+    <div><span class="where" id="dWhere"></span></div>
+    <button type="button" class="d-close" id="dClose" aria-label="Close details">&times;</button>
+  </div>
+  <div class="d-body" id="dBody"></div>
+  <div class="d-foot" id="dFoot"></div>
+</aside>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function toId(v) { return /^\d+$/.test(String(v)) ? parseInt(v, 10) : v; }
+  var ENV = '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="1.5" y="3" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 4.5l6 4.5 6-4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+
+  /* ---------- Data: types ---------- */
+  var TYPES = {
+    manual:  { label: 'Manual Action (Dasha)' },
+    email:   { label: 'Automated Email' },
+    client:  { label: 'Client Action' },
+    form:    { label: 'Form / Contract' },
+    status:  { label: 'Status Update' },
+    task:    { label: 'Task Created' },
+    handoff: { label: 'Workflow Hand-Off' }
+  };
+  var APPROVAL = { send: 'Requires approval to send', assessment: "Requires Dasha's Assessment" };
+  var REASONS_DEFAULT = ['Budget', 'No response', 'Date unavailable', 'Chose someone else', 'Not a fit for services', 'Other'];
+  var MERGE_TAGS = ['{{client.firstName}}', '{{client.name}}', '{{brand.name}}', '{{brand.emailTemplate.signature}}'];
+
+  /* ---------- Data: emails ---------- */
+  var EMAILS = [
+    { id: 'e1', n: 1, name: 'Send Form (Inquiry Form)', subject: 'Tell Us About Your Event',
+      body: `Hi {{client.firstName}},
+
+Thank you for reaching out to Dasha!
+
+We’d love to learn more about your event, your vision, and the experience you’re hoping to create. Please take a moment to complete the inquiry form below with a few details about your event.
+
+Complete Your Inquiry Form:
+{{form | formLink}}
+
+Once we receive your information, we’ll review your inquiry and follow up with the next steps.
+
+We’re looking forward to learning more about your event!
+
+Best,
+{{brand.emailTemplate.signature}}` },
+    { id: 'e2', n: 2, name: 'Inquiry Received', subject: 'We’ve Received Your Inquiry!',
+      body: `Hi {{client.name}},
+
+Thank you for completing our inquiry form!
+We have successfully received your details and are thrilled that you’re considering Dasha for your event.
+
+Our team is currently reviewing your vision and event details.
+We will follow up with you shortly regarding the next steps to bring your experience to life.
+
+We can't wait to connect with you soon!
+
+Best,
+{{brand.emailTemplate.signature}}` },
+    { id: 'e3', n: 3, name: 'Discovery Call Scheduler', subject: 'Let’s Schedule Your Consultation',
+      body: `Hi {{client.firstName}}!
+
+Thank you so much for your interest in working with Dasha Stone Illustration Studio!
+
+The next step is to schedule a consultation with me. This is a chance to connect, learn more about your event, and talk through the details of your vision, including how we can create a memorable live illustration experience for your guests.
+
+Please use the link below to choose a time that works best for you:
+
+{{scheduler | schedulerLink}}
+
+We’re looking forward to connecting with you and hearing more about your event!
+
+{{brand.emailTemplate.signature}}` },
+    { id: 'e4', n: 4, name: 'Call Booked', subject: 'Your Consultation with {{brand.name}} Is Confirmed',
+      body: `Hi {{client.firstName}}!
+
+Thank you for reaching out! We’ve received your inquiry and are excited to learn more about your event and your vision for a live wedding painting.
+
+Your consultation with Dasha is officially booked!
+
+{{appointment.title}}
+Date: {{appointment.start | mediumDate}}
+Time: {{appointment.start | shortTime}}
+Location: {{appointment.location}} {{appointment | appointmentConferencingLink}}
+
+During the call, you’ll have the opportunity to talk through your event, the atmosphere you’re envisioning, your preferred painting style, and what you’d love to create for your guests. Dasha will learn more about your celebration and recommend the experience that best fits your event and vision.
+
+We’ll also discuss the available options, package details, and investment during the call, so you’ll have a clear idea of what’s possible and what may be the best fit for you.
+
+To make the most of our time together, it’s helpful to have:
+
+- Your event date and venue
+- An idea of your desired painting style or inspiration
+- Your preferred painting size, if you already have one in mind
+- Any important wedding-day logistics or details
+- Any questions or ideas you’d like to discuss
+
+We’re looking forward to connecting with you and hearing all about your event!
+
+If you need to make any changes to your appointment, please use the options provided in your booking confirmation.
+
+See you soon!
+
+{{brand.emailTemplate.signature}}` },
+    { id: 'e5', n: 5, name: 'Send Proposal', subject: 'Your Event Proposal from Dasha',
+      body: `Hi {{client.firstName}},
+
+It was wonderful speaking with you during our consultation call! Based on your event vision, goals, and details, we have put together a customized proposal for you.
+
+We are so excited about the possibility of bringing your vision to life and creating an unforgettable experience together.
+
+Select Your Package:
+{{form | formLink}}
+
+Please review the attached details, including the package options and estimated pricing. Once you’ve had a look, let us know your thoughts or if you would like to make any adjustments.
+
+We look forward to taking the next steps with you!
+
+Best,
+{{brand.emailTemplate.signature}}` },
+    { id: 'e6', n: 6, name: 'Package Selection Received', subject: 'Thank you for your package selection!',
+      body: `Hi {{client.firstName}},
+
+Thank you so much for selecting your event package! We are thrilled to be partnering with you to bring your vision to life.
+
+Our team is currently reviewing your selection against your event details. Once reviewed, I will send over your official contract and initial invoice to finalize your booking.
+
+If you have any questions or need to make any adjustments in the meantime, please let me know.
+
+We are so excited to work with you!
+
+Best,
+{{brand.emailTemplate.signature}}` },
+    { id: 'e7', n: 7, name: 'Send Contract', subject: 'Your Contract and Invoice from Dasha',
+      body: `Hi {{client.firstName}},
+
+We are so excited to officially welcome you to the Dasha family!
+
+Following up on your package selection, your custom contract and initial deposit invoice are ready for your review and signature.
+
+Review and Sign Your Contract:
+{{job | contractLink}}
+
+Please review the details, sign the agreement, and complete the initial deposit through the link above to lock in your date. Once both steps are completed, your event date will be officially secured on our calendar!
+
+If you have any questions at all about the terms or the next steps, please don't hesitate to reach out.
+
+We can't wait to make your event unforgettable!
+
+Best,
+{{brand.emailTemplate.signature}}` },
+    { id: 'e8', n: 8, name: 'Send Invoice', subject: 'Invoice Attached: Secure Your Event Date',
+      body: `Hi {{client.firstName}},
+
+Thank you for choosing Dasha to bring your event vision to life!
+
+Your initial invoice is now ready for review and payment. Please note that a non-refundable retainer fee of $300 is required to officially book your event and secure your date on our calendar.
+
+View and Pay Your Invoice:
+{{job | invoiceLink}}
+
+Until the $300 retainer is received, your event date will remain open to other inquiries. Once payment is completed, we will officially lock in your date and send over the next planning steps!
+
+If you have any questions regarding the invoice or payment options, please feel free to reach out.
+
+We are so excited to get started!
+
+Best,
+{{brand.emailTemplate.signature}}` },
+    { id: 'e9', n: 9, name: 'Lead Lost Follow-Up', subject: 'Checking In on Your Event',
+      body: `Hi {{client.firstName}},
+
+I wanted to circle back and see how your event planning is coming along! It was such a pleasure learning about your vision, and we’d love to stay in touch.
+
+If you have any questions, would like to talk through anything again, or simply need a little more time, just let us know. We’re happy to help in whatever way we can.
+
+If your plans have changed or the timing wasn’t quite right, we completely understand. You’re always welcome to reach out in the future.
+
+Wishing you all the best with your celebration!
+
+Best,
+{{brand.emailTemplate.signature}}` }
+  ];
+  var EMAIL_BY_ID = {};
+  EMAILS.forEach(function (m) { EMAIL_BY_ID[m.id] = m; });
+
+  /* ---------- Data: steps ---------- */
+  var STEPS = [
+    { n: 1, title: 'Website Inquiry', where: 'External', types: ['client', 'manual'], approval: null,
+      summary: "Client submits the form on dashastone.com. It isn't connected to Dubsado, so Dasha enters the details by hand.",
+      trigger: 'Client submits a form on dashastone.com (not connected to Dubsado).',
+      action: 'Dasha manually enters the client details into Dubsado.',
+      automation: 'Manual. The website form does not sync with Dubsado.', autoKind: 'manual', statuses: [] },
+    { n: 2, title: 'Send Initial Form', where: 'Dubsado', types: ['form', 'email'], approval: null, email: 'e1',
+      summary: 'Send the Universal Event Inquiry Form to the client.',
+      trigger: 'Follows manual entry of the inquiry in Dubsado.',
+      action: 'Send Universal Event Inquiry Form (Inquiry Form) with Email 1.',
+      automation: 'Automated workflow action in Dubsado.', autoKind: 'auto', statuses: [], outLabel: 'If submitted' },
+    { n: 3, title: 'Confirmation Email', where: 'Dubsado', types: ['email'], approval: null, email: 'e2',
+      summary: 'Client gets a receipt confirmation once the inquiry form is submitted.',
+      trigger: 'If the Inquiry Form is submitted.',
+      action: 'Send Email: "We’ve Received Your Inquiry!"',
+      automation: 'Automated email.', autoKind: 'auto', statuses: [] },
+    { n: 4, title: 'Add Project Tags', where: 'Dubsado', types: ['status'], approval: null,
+      summary: 'Tag the project as Wedding and Private.',
+      trigger: 'After previous actions complete.',
+      action: 'Add Project Tags: Wedding and Private.',
+      automation: 'Automated workflow action.', autoKind: 'auto', statuses: [] },
+    { n: 5, title: 'Status: New Inquiry', where: 'Dubsado', types: ['status'], approval: null,
+      summary: 'Project status moves to New Inquiry.',
+      trigger: 'After previous actions complete.',
+      action: 'Update Project Status to New Inquiry.',
+      automation: 'Automated status update.', autoKind: 'auto', statuses: ['New Inquiry'] },
+    { n: 6, title: 'Assessment Task', where: 'Dubsado', types: ['task', 'manual'], approval: 'assessment',
+      summary: 'A task prompts Dasha to check eligibility and service fit.',
+      trigger: 'Created as part of the inquiry workflow.',
+      action: 'Create Task: Evaluate Client Eligibility and Service Alignment.',
+      automation: 'Task is created automatically. The evaluation is Dasha\'s own.', autoKind: 'manual', statuses: [] },
+    { n: 7, title: 'Qualification Decision', where: 'Decision point', types: ['manual', 'status'], approval: null,
+      fork: { yes: 'Qualified', no: 'Not qualified', branch: 'x' },
+      summary: 'If the client qualifies, the project moves to Qualified. If not, the lead lost automation starts.',
+      trigger: 'Condition: if qualified.',
+      action: 'Update Project Status to Qualified.',
+      automation: 'Dasha decides. The status change follows a qualified outcome.', autoKind: 'manual', statuses: ['Qualified'],
+      outLabel: 'If qualified' },
+    { n: 8, title: 'Consultation Scheduler', where: 'Dubsado', types: ['form', 'email'], approval: 'send', email: 'e3',
+      summary: 'Offer the Free Consultation scheduler once Dasha approves sending it.',
+      trigger: 'Requires approval to send.',
+      action: 'Send Scheduler: Free Consultation with Email 3.',
+      automation: 'Held until Dasha approves.', autoKind: 'approval', statuses: [], outLabel: 'Client books' },
+    { n: 9, title: 'Appointment Confirmation', where: 'Dubsado', types: ['client', 'email'], approval: null, email: 'e4',
+      summary: 'Client picks a time and receives a confirmation email.',
+      trigger: 'Client submits an appointment time.',
+      action: 'Send Email: Appointment Confirmation.',
+      automation: 'Automated email, triggered by the client.', autoKind: 'auto', statuses: [] },
+    { n: 10, title: 'Status: Discovery Call Scheduled', where: 'Dubsado', types: ['status'], approval: null,
+      summary: 'Project status updates once the appointment is booked.',
+      trigger: 'After appointment booked.',
+      action: 'Update Project Status to Discovery Call Scheduled.',
+      automation: 'Automated status update.', autoKind: 'auto', statuses: ['Discovery Call Scheduled'] },
+    { n: 11, title: 'Call Preparation Task', where: 'Dubsado', types: ['task'], approval: null,
+      summary: 'A task is created for the initial consultation call.',
+      trigger: 'During call.',
+      action: 'Create Task: Initial Client Consultation Call.',
+      automation: 'Task is created automatically.', autoKind: 'auto', statuses: [] },
+    { n: 12, title: 'Status: Discovery Call Completed', where: 'Dubsado', types: ['status'], approval: null,
+      summary: 'Project status updates after the call.',
+      trigger: 'After call completion.',
+      action: 'Update Project Status to Discovery Call Completed.',
+      automation: 'Automated status update.', autoKind: 'auto', statuses: ['Discovery Call Completed'] },
+    { n: 13, title: 'Send Proposal', where: 'Dubsado', types: ['form', 'email', 'status'], approval: 'send', email: 'e5',
+      summary: 'Send the proposal form once approved, and mark the project Proposal Sent.',
+      trigger: 'Requires approval to send.',
+      action: 'Send Form: Proposal with Email 5.',
+      automation: 'Held until Dasha approves.', autoKind: 'approval', statuses: ['Proposal Sent'], outLabel: 'After review' },
+    { n: 14, title: 'Package Confirmation', where: 'Dubsado', types: ['email'], approval: null, email: 'e6',
+      summary: 'Confirms the package the client chose.',
+      trigger: 'After proposal review.',
+      action: 'Send Email: Package Confirmation.',
+      automation: 'Automated email.', autoKind: 'auto', statuses: [] },
+    { n: 15, title: 'Agreement & Contract', where: 'Decision point', types: ['form', 'email', 'status'], approval: 'send', email: 'e7',
+      fork: { yes: 'Contract signed', no: 'Not signed', branch: 'y' },
+      summary: 'Send the Event Services Agreement. If it is signed the journey continues. If not, the lead lost automation starts.',
+      trigger: 'Requires approval to send.',
+      action: 'Send Contract: Event Services Agreement with Email 7.',
+      automation: 'Held until Dasha approves. Signing is a client action.', autoKind: 'approval',
+      statuses: ['Contract Pending', 'Contract Signed (when the client signs)'], outLabel: 'If signed' },
+    { n: 16, title: 'Invoice & Deposit', where: 'Dubsado', types: ['form', 'email', 'client', 'status'], approval: null, email: 'e8',
+      summary: 'Create the $300 retainer invoice. Paying it books the client.',
+      trigger: 'Follows the signed agreement.',
+      action: 'Create Invoice: Fixed Deposit $300 Retainer, sent with Email 8.',
+      automation: 'Invoice is created automatically. Payment is a client action.', autoKind: 'auto',
+      statuses: ['Booked (when the client pays the retainer)'] },
+    { n: 17, title: 'Workflow Hand-Off', where: 'Dubsado', types: ['handoff'], approval: null,
+      summary: 'Booking is complete, so the Booked Clients Flow takes over.',
+      trigger: 'After booking completion.',
+      action: 'Initiate Booked Clients Flow.',
+      automation: 'Automated hand-off to a separate workflow.', autoKind: 'auto', statuses: [] }
+  ];
+
+  var BRANCHES = {
+    x: { id: 'x', from: 7, edgeLabel: 'Not qualified', title: 'Lead Lost: Not Qualified', where: 'Lead lost automation',
+      types: ['manual', 'status', 'email'], approval: null, email: 'e9',
+      summary: 'Not a fit. Record why, mark the project Lead Lost, then follow up after 3 days.',
+      trigger: 'Decision at step 7: the client is not qualified.',
+      seq: [
+        { t: 'Dasha records the reason the lead was lost', k: 'manual' },
+        { t: 'Update Project Status to Lead Lost', k: 'status' },
+        { t: 'Wait 3 days', k: 'wait' },
+        { t: 'Send Email 9: follow-up', k: 'email' }
+      ],
+      automation: 'Dasha picks the reason. The status change, the 3-day wait and the follow-up email run automatically.', autoKind: 'auto',
+      statuses: ['Lead Lost'] },
+    y: { id: 'y', from: 15, edgeLabel: 'Not signed', title: 'Lead Lost: Contract Not Signed', where: 'Lead lost automation',
+      types: ['manual', 'email'], approval: null, email: 'e9',
+      summary: 'The client did not sign. Record why, then follow up after 3 days.',
+      trigger: 'Decision at step 15: the client does not sign the Event Services Agreement.',
+      seq: [
+        { t: 'Dasha records the reason the lead was lost', k: 'manual' },
+        { t: 'Wait 3 days', k: 'wait' },
+        { t: 'Send Email 9: follow-up', k: 'email' }
+      ],
+      automation: 'Dasha picks the reason. The 3-day wait and the follow-up email run automatically.', autoKind: 'auto',
+      statuses: [],
+      note: 'Only unqualified leads are moved to Lead Lost. Here the project status stays at Contract Pending. No time window for "didn’t sign" is set yet, so decide how long to wait before this path starts.' }
+  };
+
+  function nodeById(id) { return typeof id === 'string' ? BRANCHES[id] : STEPS[id - 1]; }
+
+  var EDGES = [];
+  STEPS.forEach(function (s, i) {
+    if (i < STEPS.length - 1) EDGES.push({ from: s.n, to: s.n + 1, label: s.outLabel || '', yes: !!s.fork, nearEnd: !!s.fork });
+    if (s.fork) EDGES.push({ from: s.n, to: s.fork.branch, label: BRANCHES[s.fork.branch].edgeLabel, alt: true });
+  });
+
+  /* ---------- State ---------- */
+  var STORE = 'dubsado-journey-v2', EMAIL_STORE = 'dubsado-emails-v1';
+  var state = { p: 0, lost: null, view: null, filters: [], reasons: REASONS_DEFAULT.slice(), pick: { x: '', y: '' }, editing: null, draft: null };
+  var emailStore = {};
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (saved) {
+      if (typeof saved.p === 'number' && saved.p >= 0 && saved.p <= 17) state.p = saved.p;
+      if (saved.lost === 'x' && state.p === 6) state.lost = 'x';
+      if (saved.lost === 'y' && state.p === 14) state.lost = 'y';
+      if (saved.view === 'vertical' || saved.view === 'horizontal') state.view = saved.view;
+      if (Array.isArray(saved.reasons) && saved.reasons.every(function (r) { return typeof r === 'string'; })) state.reasons = saved.reasons.slice(0, 30);
+      if (saved.pick && typeof saved.pick === 'object') {
+        ['x', 'y'].forEach(function (k) { if (typeof saved.pick[k] === 'string') state.pick[k] = saved.pick[k]; });
+      }
+    }
+    var es = JSON.parse(localStorage.getItem(EMAIL_STORE) || '{}');
+    if (es && typeof es === 'object') {
+      Object.keys(es).forEach(function (k) {
+        if (EMAIL_BY_ID[k] && es[k] && typeof es[k].subject === 'string' && typeof es[k].body === 'string') emailStore[k] = { subject: es[k].subject, body: es[k].body };
+      });
+    }
+  } catch (e) {}
+  if (!state.view) state.view = window.innerWidth >= 980 ? 'horizontal' : 'vertical';
+
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify({ p: state.p, lost: state.lost, view: state.view, reasons: state.reasons, pick: state.pick })); } catch (e) {}
+  }
+  function saveEmails() {
+    try { localStorage.setItem(EMAIL_STORE, JSON.stringify(emailStore)); } catch (e) {}
+  }
+
+  var STATE_LABEL = { done: '✓ Completed', active: 'In progress', pending: 'Pending', blocked: 'Not reached' };
+
+  function lostAt() { return state.lost === 'x' ? 7 : state.lost === 'y' ? 15 : null; }
+  function status(n) {
+    var la = lostAt();
+    if (la !== null && n > la) return 'blocked';
+    if (n <= state.p) return 'done';
+    if (n === state.p + 1) return la === n ? 'ended' : 'active';
+    return 'pending';
+  }
+  function branchStatus(id) { return state.lost === id ? 'active' : 'pending'; }
+  function labelFor(id) {
+    if (typeof id === 'string') return branchStatus(id) === 'active' ? 'Path taken' : 'Not taken';
+    var st = status(id);
+    return st === 'ended' ? STEPS[id - 1].fork.no : STATE_LABEL[st];
+  }
+
+  /* ---------- Email helpers ---------- */
+  function getEmail(id) {
+    var base = EMAIL_BY_ID[id], ed = emailStore[id];
+    return { id: id, n: base.n, name: base.name, subject: ed ? ed.subject : base.subject, body: ed ? ed.body : base.body, edited: !!ed };
+  }
+  function withTags(s) { return s.replace(/\{\{([^}]+)\}\}/g, '<span class="mtag">{{$1}}</span>'); }
+  function renderBody(text) {
+    return text.replace(/\r/g, '').trim().split(/\n\s*\n/).map(function (p) {
+      var lines = p.split('\n');
+      if (lines.every(function (l) { return /^-\s/.test(l); })) {
+        return '<ul>' + lines.map(function (l) { return '<li>' + withTags(esc(l.replace(/^-\s/, ''))) + '</li>'; }).join('') + '</ul>';
+      }
+      return '<p>' + lines.map(function (l) { return withTags(esc(l)); }).join('<br>') + '</p>';
+    }).join('');
+  }
+  function emailWhere(id) {
+    var st = STEPS.filter(function (s) { return s.email === id; })[0];
+    return st ? 'Step ' + st.n + ' · ' + st.title : 'Lead lost path · steps 7 and 15';
+  }
+
+  function emailBlockHTML(id, where) {
+    var m = getEmail(id);
+    var editing = state.editing && state.editing.id === id && state.editing.where === where;
+    var head = '<div class="em-head"><div><div class="em-label">Email ' + m.n + '</div><div class="em-name">' + esc(m.name) + '</div></div>' +
+      (m.edited ? '<span class="em-edited">Edited</span>' : '') + '</div>';
+    if (editing) {
+      var d = state.draft;
+      return head + '<div class="em-edit">' +
+        '<label class="em-field"><span>Subject</span><input type="text" class="em-subject" value="' + esc(d.subject) + '"></label>' +
+        '<label class="em-field"><span>Message</span><textarea class="em-body" rows="16">' + esc(d.body) + '</textarea></label>' +
+        '<div class="em-tags"><span>Insert merge field</span>' +
+        MERGE_TAGS.map(function (t) { return '<button type="button" class="mtag-btn" data-tag="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>' +
+        '<p class="em-hint">Leave a blank line between paragraphs. Start a line with "- " to make a bullet.</p>' +
+        '<div class="em-actions"><button type="button" class="btn sm" data-em="save">Save changes</button>' +
+        '<button type="button" class="btn sm ghost" data-em="cancel">Cancel</button></div></div>';
+    }
+    return head + '<div class="em-paper"><div class="em-subj"><span>Subject</span>' + withTags(esc(m.subject)) + '</div>' +
+      '<div class="em-text">' + renderBody(m.body) + '</div></div>' +
+      '<p class="em-hint">Highlighted items are Dubsado merge fields that fill in automatically.</p>' +
+      '<div class="em-actions"><button type="button" class="btn sm" data-em="edit">Edit email</button>' +
+      '<button type="button" class="btn sm ghost" data-em="copy">Copy</button>' +
+      (m.edited ? '<button type="button" class="btn sm ghost" data-em="reset">Restore original</button>' : '') + '</div>';
+  }
+
+  function fillBlocks(root) {
+    $$('.email-block', root).forEach(function (b) { b.innerHTML = emailBlockHTML(b.getAttribute('data-email'), b.getAttribute('data-where')); });
+  }
+  function refreshEmail(id) {
+    var m = getEmail(id);
+    $$('.email-block[data-email="' + id + '"]').forEach(function (b) { b.innerHTML = emailBlockHTML(id, b.getAttribute('data-where')); });
+    $$('.mc-sub[data-email="' + id + '"]').forEach(function (el) { el.textContent = m.subject; });
+    $$('.lib-subject[data-email="' + id + '"]').forEach(function (el) { el.textContent = m.subject; });
+    $$('.lib-edited[data-email="' + id + '"]').forEach(function (el) { el.hidden = !m.edited; });
+  }
+
+  function copyText(text, done) {
+    function fallback() {
+      var t = document.createElement('textarea');
+      t.value = text; t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      t.remove(); done();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+
+  function startEdit(id, where) {
+    var prev = state.editing, m = getEmail(id);
+    state.editing = { id: id, where: where };
+    state.draft = { subject: m.subject, body: m.body };
+    if (prev && prev.id !== id) refreshEmail(prev.id);
+    refreshEmail(id);
+    var f = $('.email-block[data-email="' + id + '"][data-where="' + where + '"] .em-subject');
+    if (f) f.focus();
+  }
+  function endEdit(id) { state.editing = null; state.draft = null; refreshEmail(id); }
+  function saveEdit(id, where) {
+    var base = EMAIL_BY_ID[id];
+    var subj = state.draft.subject.trim() || base.subject;
+    var body = state.draft.body.replace(/\r/g, '').replace(/\s+$/, '');
+    if (!body.trim()) body = base.body;
+    if (subj === base.subject && body === base.body) delete emailStore[id];
+    else emailStore[id] = { subject: subj, body: body };
+    saveEmails();
+    endEdit(id);
+    var b = $('.email-block[data-email="' + id + '"][data-where="' + where + '"] [data-em="edit"]');
+    if (b) b.focus();
+  }
+
+  /* ---------- Build nodes ---------- */
+  var nodesEl = $('#nodes'), canvas = $('#canvas'), stage = $('#stage'), svg = $('#edges'), labelsEl = $('#labels');
+  var cards = {};
+
+  function badgesHTML(s) {
+    return s.types.map(function (t) { return '<span class="badge b-' + t + '">' + TYPES[t].label + '</span>'; }).join('');
+  }
+  function mailChipHTML(id) {
+    return '<button type="button" class="mailchip" data-act="email">' + ENV + '<span><span class="mc-n">Email ' + EMAIL_BY_ID[id].n + '</span><span class="mc-sub" data-email="' + id + '"></span></span></button>';
+  }
+  function seqHTML(b) {
+    return b.seq.map(function (q, i) { return '<li class="k-' + q.k + '"><span>' + (i + 1) + '</span><div>' + q.t + '</div></li>'; }).join('');
+  }
+
+  function cardHTML(s) {
+    var pad = String(s.n).padStart(2, '0');
+    var foot;
+    if (s.fork) {
+      foot = '<div class="decide" role="group" aria-label="Outcome of step ' + s.n + '">' +
+        '<button type="button" class="btn sm" data-act="yes" aria-pressed="false">' + s.fork.yes + '</button>' +
+        '<button type="button" class="btn sm ghost" data-act="no" aria-pressed="false">' + s.fork.no + '</button></div>';
+    } else {
+      foot = '<button type="button" class="btn sm" data-act="toggle" aria-pressed="false"></button>';
+    }
+    return '<article class="card' + (s.fork ? ' decision' : '') + (s.approval ? ' approval' : '') + '" id="step-' + s.n + '" data-id="' + s.n + '" aria-labelledby="t-' + s.n + '">' +
+      '<div class="card-top"><span class="num"><span>' + pad + '</span></span><span class="where">' + s.where + '</span><span class="pill"></span></div>' +
+      '<h3 id="t-' + s.n + '"><button type="button" class="open" data-act="open">' + s.title + '</button></h3>' +
+      '<p class="sum">' + s.summary + '</p>' +
+      '<div class="badges">' + badgesHTML(s) + '</div>' +
+      (s.approval ? '<span class="approval-tag">' + APPROVAL[s.approval] + '</span>' : '') +
+      (s.email ? mailChipHTML(s.email) : '') +
+      '<div class="card-foot">' + foot + '<button type="button" class="more" data-act="open" aria-label="Details for ' + esc(s.title) + '">Details &rarr;</button></div>' +
+      '</article>';
+  }
+
+  function branchHTML(b) {
+    return '<article class="card branch" id="step-' + b.id + '" data-id="' + b.id + '" aria-labelledby="t-' + b.id + '">' +
+      '<div class="card-top"><span class="num"><span>&times;</span></span><span class="where">' + b.where + '</span><span class="pill"></span></div>' +
+      '<h3 id="t-' + b.id + '"><button type="button" class="open" data-act="open">' + b.title + '</button></h3>' +
+      '<p class="sum">' + b.summary + '</p>' +
+      '<ol class="seq">' + seqHTML(b) + '</ol>' +
+      '<div class="badges" style="margin-top:10px">' + badgesHTML(b) + '</div>' +
+      '<span class="reason-chip" hidden></span>' +
+      mailChipHTML(b.email) +
+      '<div class="card-foot"><span></span><button type="button" class="more" data-act="open" aria-label="Details for ' + esc(b.title) + '">Details &rarr;</button></div>' +
+      '</article>';
+  }
+
+  nodesEl.innerHTML = STEPS.map(function (s) {
+    var br = s.fork ? BRANCHES[s.fork.branch] : null;
+    return '<li class="slot' + (br ? ' has-branch' : '') + '">' + cardHTML(s) + (br ? branchHTML(br) : '') + '</li>';
+  }).join('');
+  STEPS.forEach(function (s) { cards[s.n] = $('#step-' + s.n); });
+  Object.keys(BRANCHES).forEach(function (k) { cards[k] = $('#step-' + k); });
+
+  /* ---------- Email library ---------- */
+  $('#libList').innerHTML = EMAILS.map(function (m) {
+    return '<details class="lib-item" id="lib-' + m.id + '"><summary>' +
+      '<span class="lib-n">' + m.n + '</span>' +
+      '<span class="lib-main"><span class="lib-name">' + esc(m.name) + '</span><span class="lib-subject" data-email="' + m.id + '"></span></span>' +
+      '<span class="lib-where">' + esc(emailWhere(m.id)) + '</span>' +
+      '<span class="em-edited lib-edited" data-email="' + m.id + '" hidden>Edited</span>' +
+      '</summary><div class="email-block" data-email="' + m.id + '" data-where="lib"></div></details>';
+  }).join('');
+  EMAILS.forEach(function (m) { refreshEmail(m.id); });
+
+  /* ---------- Build filters ---------- */
+  var filtersEl = $('#filters');
+  filtersEl.innerHTML = '<span class="lbl">Highlight</span>' +
+    Object.keys(TYPES).map(function (k) {
+      return '<button type="button" class="chip" data-filter="' + k + '" aria-pressed="false">' + TYPES[k].label + '</button>';
+    }).join('') +
+    '<button type="button" class="chip approval-chip" data-filter="approval" aria-pressed="false">Needs approval</button>' +
+    '<button type="button" class="chip" data-filter="" id="clearFilters" hidden>Clear</button>';
+
+  /* ---------- Build edges ---------- */
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var edgeEls = EDGES.map(function (e) {
+    var g = document.createElementNS(SVGNS, 'g');
+    g.setAttribute('class', 'edge' + (e.alt ? ' alt' : ''));
+    var base = document.createElementNS(SVGNS, 'path'); base.setAttribute('class', 'base');
+    var flow = document.createElementNS(SVGNS, 'path'); flow.setAttribute('class', 'flow');
+    var fill = document.createElementNS(SVGNS, 'path'); fill.setAttribute('class', 'fill'); fill.setAttribute('pathLength', '1');
+    var head = document.createElementNS(SVGNS, 'polygon'); head.setAttribute('class', 'head');
+    g.appendChild(base); g.appendChild(flow); g.appendChild(fill); g.appendChild(head);
+    svg.appendChild(g);
+    var lab = null;
+    if (e.label) {
+      lab = document.createElement('div');
+      lab.className = 'elabel' + (e.alt ? ' alt' : '') + (e.yes ? ' yes' : '');
+      lab.textContent = e.label;
+      labelsEl.appendChild(lab);
+    }
+    return { e: e, g: g, base: base, flow: flow, fill: fill, head: head, lab: lab };
+  });
+
+  function rel(el, cr) {
+    var r = el.getBoundingClientRect();
+    return { l: r.left - cr.left, t: r.top - cr.top, r: r.right - cr.left, b: r.bottom - cr.top, w: r.width, h: r.height };
+  }
+
+  var rafId = 0;
+  function scheduleLayout() {
+    if (rafId) return;
+    rafId = requestAnimationFrame(function () { rafId = 0; layout(); });
+  }
+
+  function layout() {
+    var cr = canvas.getBoundingClientRect();
+    var W = Math.ceil(cr.width), H = Math.ceil(cr.height);
+    svg.setAttribute('width', W); svg.setAttribute('height', H);
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    var vertical = state.view === 'vertical';
+    var RAIL = 32;
+
+    edgeEls.forEach(function (o) {
+      var a = rel(cards[o.e.from], cr), b = rel(cards[o.e.to], cr);
+      var d, headPts, lx, ly, lt;
+      if (b.l >= a.r - 4) {
+        var x1 = a.r + 3, y1 = a.t + Math.min(a.h / 2, 56);
+        var tx = b.l - 3, ty = b.t + Math.min(b.h / 2, 56);
+        var ex = tx - 9, k = Math.max(28, (ex - x1) * 0.5);
+        d = 'M' + x1 + ' ' + y1 + ' C' + (x1 + k) + ' ' + y1 + ',' + (ex - k) + ' ' + ty + ',' + ex + ' ' + ty;
+        headPts = tx + ',' + ty + ' ' + ex + ',' + (ty - 5.5) + ' ' + ex + ',' + (ty + 5.5);
+        lx = (x1 + 3 * (x1 + k) + 3 * (ex - k) + ex) / 8;
+        ly = (y1 + 3 * y1 + 3 * ty + ty) / 8;
+        lt = 'translate(-50%, calc(-100% - 8px))';
+      } else {
+        var xa, xb;
+        if (vertical) {
+          xa = a.l + RAIL; xb = b.l + RAIL;
+          if (typeof o.e.to === 'string') { xa = xb; }
+        } else {
+          xa = xb = b.l + b.w / 2;
+        }
+        var ya = a.b + 3, tyv = b.t - 3, ey = tyv - 9, kv = Math.max(24, (ey - ya) * 0.5);
+        d = 'M' + xa + ' ' + ya + ' C' + xa + ' ' + (ya + kv) + ',' + xb + ' ' + (ey - kv) + ',' + xb + ' ' + ey;
+        headPts = xb + ',' + tyv + ' ' + (xb - 5.5) + ',' + ey + ' ' + (xb + 5.5) + ',' + ey;
+        lx = (xa + xb) / 2 + 12;
+        if (o.e.nearEnd && vertical) { ly = ey - 2; lt = 'translateY(-100%)'; }
+        else { ly = (ya + ey) / 2; lt = 'translateY(-50%)'; }
+      }
+      o.base.setAttribute('d', d); o.flow.setAttribute('d', d); o.fill.setAttribute('d', d);
+      o.head.setAttribute('points', headPts);
+      if (o.lab) { o.lab.style.left = lx + 'px'; o.lab.style.top = ly + 'px'; o.lab.style.transform = lt; }
+    });
+  }
+
+  /* ---------- Update state in DOM ---------- */
+  function matchesFilter(s) {
+    if (!state.filters.length) return true;
+    return state.filters.some(function (f) { return f === 'approval' ? !!s.approval : s.types.indexOf(f) !== -1; });
+  }
+  function resetClass(card, st) {
+    card.className = card.className.replace(/\bst-\w+\b/g, '').replace(/\s+/g, ' ').trim();
+    card.classList.add('st-' + st);
+  }
+
+  function updateState() {
+    STEPS.forEach(function (s) {
+      var card = cards[s.n], st = status(s.n);
+      resetClass(card, st);
+      card.classList.toggle('dim', !matchesFilter(s));
+      $('.pill', card).textContent = labelFor(s.n);
+      if (s.fork) {
+        var yes = $('[data-act="yes"]', card), no = $('[data-act="no"]', card);
+        yes.setAttribute('aria-pressed', String(state.p >= s.n));
+        no.setAttribute('aria-pressed', String(state.lost === s.fork.branch));
+        yes.disabled = no.disabled = (st === 'blocked');
+      } else {
+        var t = $('[data-act="toggle"]', card), done = st === 'done';
+        t.setAttribute('aria-pressed', String(done));
+        t.textContent = done ? '✓ Completed' : 'Mark complete';
+        t.disabled = st === 'blocked';
+      }
+    });
+    Object.keys(BRANCHES).forEach(function (id) {
+      var bc = cards[id], bs = branchStatus(id);
+      resetClass(bc, bs);
+      bc.classList.toggle('dim', !matchesFilter(BRANCHES[id]));
+      $('.pill', bc).textContent = labelFor(id);
+      var chip = $('.reason-chip', bc), pk = state.pick[id];
+      chip.hidden = !(pk || state.lost === id);
+      chip.textContent = pk ? 'Reason: ' + pk : 'Reason: not set yet';
+    });
+
+    var la = lostAt();
+    edgeEls.forEach(function (o) {
+      var e = o.e, active, next = false, blocked = false;
+      if (e.alt) { active = state.lost === e.to; }
+      else {
+        active = e.from <= state.p;
+        next = e.from === state.p && !state.lost;
+        blocked = la !== null && e.from >= la;
+      }
+      o.g.classList.toggle('active', active);
+      o.g.classList.toggle('next', next);
+      o.g.classList.toggle('blocked', blocked);
+      if (o.lab) o.lab.classList.toggle('blocked', blocked);
+    });
+
+    var total = STEPS.length;
+    $('#progressText').textContent = state.p + ' of ' + total + ' steps complete' +
+      (state.lost === 'x' ? ' · path ended: not qualified' : state.lost === 'y' ? ' · path ended: contract not signed' : '');
+    $('#barFill').style.width = (state.p / total * 100) + '%';
+    $('#bar').setAttribute('aria-valuenow', state.p);
+    $('#advance').disabled = state.p >= total || !!state.lost;
+    $('#advance').title = state.lost === 'x' ? 'Choose "Qualified" on step 7 to continue the journey'
+      : state.lost === 'y' ? 'Choose "Contract signed" on step 15 to continue the journey' : '';
+
+    $$('.chip[data-filter]', filtersEl).forEach(function (c) {
+      var f = c.getAttribute('data-filter');
+      if (f) c.setAttribute('aria-pressed', String(state.filters.indexOf(f) !== -1));
+    });
+    $('#clearFilters').hidden = !state.filters.length;
+
+    if (drawerId !== null) renderDrawer(drawerId);
+  }
+
+  function scrollToCurrent() {
+    var target = null;
+    if (state.lost) target = state.lost;
+    else {
+      for (var i = 1; i <= STEPS.length; i++) { if (status(i) === 'active') { target = i; break; } }
+      if (target === null) target = STEPS.length;
+    }
+    var el = cards[target];
+    if (!el) return;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest', inline: 'center' });
+  }
+
+  function commit(scroll) {
+    save();
+    updateState();
+    if (scroll) scrollToCurrent();
+  }
+
+  /* ---------- Actions ---------- */
+  function toggleStep(n) {
+    state.lost = null;
+    state.p = (n <= state.p) ? n - 1 : n;
+    commit(true);
+  }
+  function decide(n, ans) {
+    var f = STEPS[n - 1].fork;
+    if (ans === 'yes') {
+      state.lost = null;
+      state.p = state.p >= n ? n - 1 : n;
+    } else {
+      state.lost = state.lost === f.branch ? null : f.branch;
+      state.p = n - 1;
+    }
+    commit(true);
+  }
+  function setView(v) {
+    state.view = v;
+    canvas.className = 'canvas view-' + v;
+    stage.classList.toggle('is-horizontal', v === 'horizontal');
+    $$('.seg button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-view') === v)); });
+    save();
+    scheduleLayout();
+    setTimeout(scheduleLayout, 60);
+  }
+  function setReason(id, val) { state.pick[id] = val; save(); updateState(); }
+  function addReason(text) {
+    var t = text.trim().slice(0, 40);
+    if (!t) return false;
+    var dupe = state.reasons.some(function (r) { return r.toLowerCase() === t.toLowerCase(); });
+    if (!dupe) state.reasons.push(t);
+    save(); reasonOpen = true; updateState();
+    return true;
+  }
+  function delReason(val) {
+    state.reasons = state.reasons.filter(function (r) { return r !== val; });
+    ['x', 'y'].forEach(function (k) { if (state.pick[k] === val) state.pick[k] = ''; });
+    save(); reasonOpen = true; updateState();
+  }
+
+  /* ---------- Drawer ---------- */
+  var drawer = $('#drawer'), scrim = $('#scrim'), dBody = $('#dBody'), dFoot = $('#dFoot'), dWhere = $('#dWhere');
+  var drawerId = null, lastFocus = null, reasonOpen = false;
+
+  function reasonHTML(id) {
+    var cur = state.pick[id];
+    var opts = '<option value="">Select a reason…</option>' + state.reasons.map(function (r) {
+      return '<option value="' + esc(r) + '"' + (r === cur ? ' selected' : '') + '>' + esc(r) + '</option>';
+    }).join('');
+    return '<div class="d-sec"><h4>Reason lead was lost</h4>' +
+      '<select id="reasonSel" class="fld" data-branch="' + id + '" aria-label="Reason lead was lost">' + opts + '</select>' +
+      '<details class="reason-edit"' + (reasonOpen ? ' open' : '') + '><summary>Edit reason list</summary>' +
+      '<ul class="reason-chips">' + state.reasons.map(function (r) {
+        return '<li><span>' + esc(r) + '</span><button type="button" data-act="delReason" data-val="' + esc(r) + '" aria-label="Remove reason ' + esc(r) + '">&times;</button></li>';
+      }).join('') + '</ul>' +
+      '<div class="reason-add"><input type="text" id="reasonNew" class="fld" maxlength="40" placeholder="Add a reason" aria-label="New reason">' +
+      '<button type="button" class="btn sm" data-act="addReason">Add</button></div></details></div>';
+  }
+
+  function renderDrawer(id) {
+    var s = nodeById(id), isB = typeof id === 'string';
+    dWhere.textContent = (isB ? '' : 'Step ' + s.n + ' of 17 · ') + s.where;
+    var st = isB ? branchStatus(id) : status(s.n);
+    var html = '<div class="d-meta"><span class="pill st-' + st + '" style="margin-left:0">' + labelFor(id) + '</span>' + badgesHTML(s) + '</div>' +
+      '<h2 id="dTitle">' + s.title + '</h2>' +
+      (s.approval ? '<span class="approval-tag" style="margin-top:0">' + APPROVAL[s.approval] + '</span>' : '') +
+      '<div class="d-sec"><h4>Trigger</h4><p>' + s.trigger + '</p></div>';
+    if (isB) html += '<div class="d-sec"><h4>Automation sequence</h4><ol class="seq">' + seqHTML(s) + '</ol></div>';
+    else html += '<div class="d-sec"><h4>Action</h4><p>' + s.action + '</p></div>';
+    html += '<div class="d-sec"><h4>Automation status</h4><p class="auto-kind k-' + s.autoKind + '">' + s.automation + '</p></div>';
+    if (isB) html += reasonHTML(id);
+    if (s.email) html += '<div class="d-sec" id="dEmail"><h4>Email sent at this step</h4><div class="email-block" data-email="' + s.email + '" data-where="drawer"></div></div>';
+    if (s.statuses && s.statuses.length) {
+      html += '<div class="d-sec"><h4>Project status updates</h4><ul>' + s.statuses.map(function (x) { return '<li class="stat">' + x + '</li>'; }).join('') + '</ul></div>';
+    }
+    if (s.note) html += '<div class="d-sec"><h4>Note</h4><p>' + s.note + '</p></div>';
+
+    var nx = [];
+    if (isB) nx.push('<p>The path ends after the follow-up email.</p>');
+    else if (s.n === 17) nx.push('<p>Booked Clients Flow, a separate Dubsado workflow that takes over after booking.</p>');
+    else {
+      nx.push('<button type="button" class="next-btn" data-go="' + (s.n + 1) + '"><span>' + (s.n + 1) + '</span><span>' + STEPS[s.n].title + (s.fork ? '<small>' + s.outLabel + '</small>' : '') + '</span></button>');
+      if (s.fork) nx.push('<button type="button" class="next-btn" data-go="' + s.fork.branch + '"><span>&times;</span><span>' + BRANCHES[s.fork.branch].title + '<small>If ' + s.fork.no.toLowerCase() + '</small></span></button>');
+    }
+    html += '<div class="d-sec"><h4>Next actions</h4><ul>' + nx.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>';
+    dBody.innerHTML = html;
+    fillBlocks(dBody);
+
+    var foot = '';
+    var prevId = isB ? s.from : (s.n > 1 ? s.n - 1 : null);
+    if (prevId) foot += '<button type="button" class="btn ghost sm" data-go="' + prevId + '">&larr; Previous</button>';
+    foot += '<span class="spacer"></span>';
+    if (isB) {
+      foot += '<button type="button" class="btn sm" data-act="branch" aria-pressed="' + (state.lost === id) + '">' + (state.lost === id ? '✓ Path taken' : 'Take this path') + '</button>';
+    } else if (s.fork) {
+      var blocked = status(s.n) === 'blocked';
+      foot += '<button type="button" class="btn sm" data-act="yes" aria-pressed="' + (state.p >= s.n) + '"' + (blocked ? ' disabled' : '') + '>' + s.fork.yes + '</button>' +
+              '<button type="button" class="btn sm ghost" data-act="no" aria-pressed="' + (state.lost === s.fork.branch) + '"' + (blocked ? ' disabled' : '') + '>' + s.fork.no + '</button>';
+    } else {
+      var done = status(s.n) === 'done';
+      foot += '<button type="button" class="btn sm" data-act="toggle" aria-pressed="' + done + '"' + (status(s.n) === 'blocked' ? ' disabled' : '') + '>' + (done ? '✓ Completed' : 'Mark complete') + '</button>';
+    }
+    if (!isB && s.n < 17) foot += '<button type="button" class="btn ghost sm" data-go="' + (s.n + 1) + '">Next &rarr;</button>';
+    dFoot.innerHTML = foot;
+  }
+
+  function openDrawer(id, trigger, toEmail) {
+    if (drawerId === null) { lastFocus = trigger || document.activeElement; reasonOpen = false; }
+    drawerId = id;
+    renderDrawer(id);
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    scrim.classList.add('on');
+    dBody.scrollTop = 0;
+    $('#dClose').focus();
+    if (toEmail) { var em = $('#dEmail'); if (em) em.scrollIntoView({ block: 'start' }); }
+  }
+  function closeDrawer() {
+    if (drawerId === null) return;
+    drawerId = null;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    scrim.classList.remove('on');
+    if (lastFocus && document.body.contains(lastFocus)) lastFocus.focus();
+  }
+
+  /* ---------- Events ---------- */
+  nodesEl.addEventListener('click', function (ev) {
+    var btn = ev.target.closest('button[data-act]');
+    var card = ev.target.closest('.card');
+    if (!card) return;
+    var nid = toId(card.getAttribute('data-id'));
+    if (btn) {
+      var act = btn.getAttribute('data-act');
+      if (act === 'toggle') toggleStep(nid);
+      else if (act === 'yes' || act === 'no') decide(nid, act);
+      else if (act === 'open') openDrawer(nid, btn);
+      else if (act === 'email') openDrawer(nid, btn, true);
+      return;
+    }
+    openDrawer(nid, card.querySelector('.open'));
+  });
+
+  function addReasonFromInput() {
+    var inp = $('#reasonNew');
+    if (inp && addReason(inp.value)) { var n = $('#reasonNew'); if (n) n.focus(); }
+  }
+
+  drawer.addEventListener('click', function (ev) {
+    var btn = ev.target.closest('button');
+    if (!btn) return;
+    if (btn.hasAttribute('data-go')) {
+      var gid = toId(btn.getAttribute('data-go'));
+      openDrawer(gid);
+      var c = cards[gid]; if (c) c.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      return;
+    }
+    var act = btn.getAttribute('data-act');
+    if (act === 'toggle') toggleStep(drawerId);
+    else if (act === 'yes' || act === 'no') decide(drawerId, act);
+    else if (act === 'branch') decide(nodeById(drawerId).from, 'no');
+    else if (act === 'addReason') addReasonFromInput();
+    else if (act === 'delReason') delReason(btn.getAttribute('data-val'));
+  });
+  drawer.addEventListener('change', function (ev) {
+    if (ev.target.id === 'reasonSel') setReason(ev.target.getAttribute('data-branch'), ev.target.value);
+  });
+  drawer.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter' && ev.target.id === 'reasonNew') { ev.preventDefault(); addReasonFromInput(); }
+  });
+  drawer.addEventListener('toggle', function (ev) {
+    if (ev.target.classList && ev.target.classList.contains('reason-edit')) reasonOpen = ev.target.open;
+  }, true);
+
+  $('#dClose').addEventListener('click', closeDrawer);
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function (ev) {
+    if (drawerId === null) return;
+    if (ev.key === 'Escape') { closeDrawer(); return; }
+    if (ev.key === 'Tab') {
+      var f = $$('button:not([disabled]), input, select, textarea, summary', drawer);
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+    }
+  });
+
+  /* email editing (library and drawer share these handlers) */
+  document.addEventListener('click', function (ev) {
+    var tb = ev.target.closest('[data-tag]');
+    if (tb) {
+      var ta = tb.closest('.email-block').querySelector('.em-body');
+      if (!ta) return;
+      var tag = tb.getAttribute('data-tag'), s0 = ta.selectionStart, e0 = ta.selectionEnd;
+      ta.value = ta.value.slice(0, s0) + tag + ta.value.slice(e0);
+      ta.focus();
+      ta.selectionStart = ta.selectionEnd = s0 + tag.length;
+      if (state.draft) state.draft.body = ta.value;
+      return;
+    }
+    var b = ev.target.closest('[data-em]');
+    if (!b) return;
+    var block = b.closest('.email-block');
+    if (!block) return;
+    var id = block.getAttribute('data-email'), where = block.getAttribute('data-where'), act = b.getAttribute('data-em');
+    if (act === 'edit') startEdit(id, where);
+    else if (act === 'cancel') endEdit(id);
+    else if (act === 'save') saveEdit(id, where);
+    else if (act === 'reset') { delete emailStore[id]; saveEmails(); refreshEmail(id); }
+    else if (act === 'copy') {
+      var m = getEmail(id);
+      copyText('Subject: ' + m.subject + '\n\n' + m.body, function () {
+        b.textContent = 'Copied';
+        b.focus();
+        setTimeout(function () { if (document.body.contains(b)) b.textContent = 'Copy'; }, 1600);
+      });
+    }
+  });
+  document.addEventListener('input', function (ev) {
+    if (!state.draft) return;
+    var t = ev.target;
+    if (t.classList.contains('em-subject')) state.draft.subject = t.value;
+    else if (t.classList.contains('em-body')) state.draft.body = t.value;
+  });
+
+  $('#libToggle').addEventListener('click', function () {
+    var items = $$('.lib-item'), anyClosed = items.some(function (d) { return !d.open; });
+    items.forEach(function (d) { d.open = anyClosed; });
+    this.textContent = anyClosed ? 'Collapse all' : 'Expand all';
+  });
+  $('#libDownload').addEventListener('click', function () {
+    var text = EMAILS.map(function (m) {
+      var e = getEmail(m.id);
+      return 'EMAIL ' + e.n + ': ' + e.name + '\n' + emailWhere(m.id) + '\n\nSubject: ' + e.subject + '\n\n' + e.body;
+    }).join('\n\n' + new Array(61).join('=') + '\n\n') + '\n';
+    var blob = new Blob([text], { type: 'text/plain' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'dasha-client-journey-emails.txt';
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+
+  $$('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () { setView(b.getAttribute('data-view')); });
+  });
+  $('#advance').addEventListener('click', function () {
+    if (state.p < STEPS.length && !state.lost) { state.p += 1; commit(true); }
+  });
+  $('#reset').addEventListener('click', function () {
+    state.p = 0; state.lost = null; state.pick = { x: '', y: '' }; commit(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    stage.scrollTo({ left: 0, behavior: 'smooth' });
+  });
+  filtersEl.addEventListener('click', function (ev) {
+    var c = ev.target.closest('.chip');
+    if (!c) return;
+    var f = c.getAttribute('data-filter');
+    if (!f) { state.filters = []; }
+    else {
+      var i = state.filters.indexOf(f);
+      if (i === -1) state.filters.push(f); else state.filters.splice(i, 1);
+    }
+    updateState();
+  });
+
+  /* ---------- Resize handling ---------- */
+  if ('ResizeObserver' in window) {
+    var ro = new ResizeObserver(scheduleLayout);
+    ro.observe(canvas);
+    Object.keys(cards).forEach(function (k) { ro.observe(cards[k]); });
+  }
+  window.addEventListener('resize', scheduleLayout);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleLayout);
+  window.addEventListener('load', scheduleLayout);
+
+  /* ---------- Init ---------- */
+  setView(state.view);
+  updateState();
+  layout();
+})();
+
+</script>
+</body>
+</html>
